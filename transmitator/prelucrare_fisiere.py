@@ -12,7 +12,7 @@ class Prelucrare_fisier:
         # citesc continutul fisierului
         text = c.read()
         # il afisez doar pentru test, DE SCOS
-        print(text)
+        # print(text)
         # inchid fisierul
         c.close()
         # returnez fisierul citit
@@ -47,19 +47,20 @@ class Thread_Prelucrare(Thread):
             if len(Thread_Prelucrare.coada_fisiere) == 0:
                 Thread_Prelucrare.stare_citire.wait()
             # prelucrez urmatorul elem din coada
-            sir=Prelucrare_fisier.citire_fisier(Thread_Prelucrare.coada_fisiere.pop(0))
-            # TODO partea de prelucrare vector
-            pachete=Prelucrare_fisier.impachetare_continut(sir)
-            # pun in coada de pachete
-            Thread_Prelucrare.coada_pachete= Thread_Prelucrare.coada_pachete + pachete
+            if len(Thread_Prelucrare.coada_fisiere):
+                sir=Prelucrare_fisier.citire_fisier(Thread_Prelucrare.coada_fisiere.pop(0))
+                # TODO partea de prelucrare vector
+                pachete=Prelucrare_fisier.impachetare_continut(sir)
+                # pun in coada de pachete
+                Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + pachete
 
-            # verific daca s-a creat conexiunea cu socket-ul
-            if(s_u.Socket_Utile.flag):
-                #  anunt thread-ul cu socketul ca poate sa isi inceapa treaba
-                s_c.Thread_Comunicare.stare_comunicare.acquire()
-                s_c.Thread_Comunicare.stare_comunicare.notify()
-                # eliberare lock
-                s_c.Thread_Comunicare.stare_comunicare.release()
+                if s_u.Socket_Utile.flag:
+                    #  anunt thread-ul de trimitere ca poate sa isi inceapa treaba
+                    s_c.Thread_Trimitere.stare_trimitere.acquire()
+                    s_c.Thread_Trimitere.stare_trimitere.notify()
+                    # eliberare lock
+                    s_c.Thread_Trimitere.stare_trimitere.release()
+
             Thread_Prelucrare.stare_citire.release()
 
 

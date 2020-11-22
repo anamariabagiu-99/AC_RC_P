@@ -53,7 +53,8 @@ class InterfataGrafica:
 
     def design_button(self):
         # butonul de start, am o comanda pentru a incepe transmiterea
-        self.start = Button(self.i, text='Start', fg='black', bg='cornflowerblue', width=15, height=2, command=Socket_Utile.initializare)
+        self.start = Button(self.i, text='Start', fg='black', bg='cornflowerblue', width=15, height=2,
+                            command=Socket_Utile.initializare)
 
         # butonul pentru inchiderea interfetei
         self.stop = Button(self.i, text='Stop', fg='black', bg='cornflowerblue', width=15, height=2, command=self.i.destroy)
@@ -67,16 +68,17 @@ class InterfataGrafica:
         if(s_u.Socket_Utile.flag ):
             s_c.receive_fct()
         self.i.mainloop()
-        self.update_label_ACK()
+
 
     def browse(self, k, y):
-        x = Button(self.i, text='Rasfoire',fg='black', bg='cyan', width=15, height=2, command=lambda: self.file_opener())
+        x = Button(self.i, text='Rasfoire',fg='black', bg='cyan',
+                   width=15, height=2, command=lambda: self.file_opener())
         x.place(x=k, y=y)
         return x
 
     def file_opener(self):
         # deschidere fisier
-        input = filedialog.askopenfile(initialdir="/Desktop")
+        input = filedialog.askopenfile(initialdir=".")
         # salvez calea fisierului
         self.cale=input.name
         # acord lock
@@ -85,7 +87,7 @@ class InterfataGrafica:
         Thread_Prelucrare.coada_fisiere.append(input.name)
         # notific thread-ul pentru prelucrarea fisierului
         Thread_Prelucrare.stare_citire.notify()
-        #eliberez lock
+        # eliberez lock
         Thread_Prelucrare.stare_citire.release()
         # incrementez numarul de fisiere deschise
         self.contor=self.contor+1
@@ -118,7 +120,9 @@ class InterfataGrafica:
     def update_label_open_file(self, text):
         self.text_box.insert(END, 'Am deschis fisierul \t'+text+'\n\n')
 
-
-    def update_label_ACK(self):
-        s_c.receive_fct()
+    def update_label_ACK(self, nr):
         self.text_inf.insert(END, '\n\n Am primit ACK pentru pachetul \t'+nr)
+
+    def stop_button(self):
+        s_u.Socket_Utile.UDPServerSocket.shutdown()
+
