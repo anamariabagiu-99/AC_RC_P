@@ -2,6 +2,8 @@ from interfata_grafica import *
 from socket_com import *
 from prelucrare_date import *
 def main():
+    #Prelucrare_date.prelucrare('&73&nndnsn#51#')
+    #Prelucrare_date.sir_number('1234')
     r = InterfataGrafica()
     t_trimire_ACK=Thread_Trimitere_ACK(r)
     t_primire_date=Thread_Primire_Date(r)

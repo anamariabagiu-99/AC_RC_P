@@ -40,9 +40,6 @@ class InterfataGrafica:
         # folosesc o variabile contor in care sa retin nr de fisiere deschise
         self.contor=0
 
-
-
-
     def design_win(self):
         # setez titlul
         self.i.title("Sender")
@@ -78,7 +75,7 @@ class InterfataGrafica:
 
     def file_opener(self):
         # deschidere fisier
-        input = filedialog.askopenfile(initialdir=".")
+        input = filedialog.askopenfile(initialdir="/home/ana/Desktop/Retele_de_calculatoare_Proiect/cod/fisiere/")
         # salvez calea fisierului
         self.cale=input.name
         # acord lock
@@ -107,8 +104,6 @@ class InterfataGrafica:
         text_box=Text(self.i, width=50, height=30, bg='lightskyblue')
         text_box.place(x=x, y=y)
         return text_box
-
-
 
     def create_label(self, text, x, y):
         #creez etichete

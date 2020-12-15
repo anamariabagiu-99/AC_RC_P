@@ -31,7 +31,7 @@ class Thread_Trimitere_ACK(Thread):
                 s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                         (s_u.Socket_Utile.localIP, 20001))
                 # TODO de pus pachetul corespunzator
-                self.i.update_label_ACK("1")
+                self.i.update_label_ACK(string)
                 # eliberez lock
 
 

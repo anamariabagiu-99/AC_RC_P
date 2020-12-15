@@ -7,7 +7,7 @@ import socket_utile_c as s_u
 import sys
 import select
 import interfata_grafica as ig
-
+import Tahoe_Algoritm as ta
 
 # thread pentru trimiterea pe socket
 class Thread_Trimitere(Thread):
@@ -31,6 +31,7 @@ class Thread_Trimitere(Thread):
             # trimit ceva pe sarma
             # de modificat DOAR pentru test
             if len( p_f.Thread_Prelucrare.coada_pachete):
+                # daca am in coada
                 string = p_f.Thread_Prelucrare.coada_pachete.pop(0)
                 s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                         (s_u.Socket_Utile.localIP, 1089))

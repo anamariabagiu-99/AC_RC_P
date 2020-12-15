@@ -20,7 +20,7 @@ if __name__ == '__main__':
     t_trimitere.join()
     t_primire.join()
 
-    #citire(r.path)
+
     
 
 
