@@ -8,6 +8,7 @@ import sys
 import select
 import interfata_grafica as ig
 import Tahoe_Algoritm as ta
+import Thread_Prelucrare_ACK as tpa
 
 # thread pentru trimiterea pe socket
 class Thread_Trimitere(Thread):
@@ -30,10 +31,30 @@ class Thread_Trimitere(Thread):
             # TODO partea de transmisie cu un anumit nr de pachete
             # trimit ceva pe sarma
             # de modificat DOAR pentru test
-            if len( p_f.Thread_Prelucrare.coada_pachete):
-                # daca am in coada
-                string = p_f.Thread_Prelucrare.coada_pachete.pop(0)
-                s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
+            if len( p_f.Thread_Prelucrare.coada_pachete)and  len(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)==0:
+                # daca am in coada preiau din aceasta doar cate imi spune cwnd
+                coada_trimis=[]
+                # mai intai verific daca in coada nu sunt mai putine pachete decat dim
+                if len(p_f.Thread_Prelucrare.coada_pachete)<ta.Tahoe_Algoritm.cwnd:
+                    # le trimit pe toate
+                    coada_trimis=p_f.Thread_Prelucrare.coada_pachete
+
+                else:
+                    # scot din coada doar cwnd pachete
+                    #print('cwnd ='+ str(ta.Tahoe_Algoritm.cwnd))
+                    for i in range (0, ta.Tahoe_Algoritm.cwnd):
+                        p=p_f.Thread_Prelucrare.coada_pachete.pop(0)
+                        coada_trimis=coada_trimis+[p]
+                        ta.Tahoe_Algoritm.coada_pachete_neconfirmate\
+                            =ta.Tahoe_Algoritm.coada_pachete_neconfirmate+[p]
+                    #print(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)
+                    #print(coada_trimis)
+                # si le pun in coada cu pachete neconfirmate
+                #string = p_f.Thread_Prelucrare.coada_pachete.pop(0)
+                # trimit toate pachetele din coada de trimis
+                for i in range(0, len(coada_trimis)):
+                    string=coada_trimis.pop(0)
+                    s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                         (s_u.Socket_Utile.localIP, 1089))
             # eliberez lock
             Thread_Trimitere.stare_trimitere.release()
@@ -43,6 +64,7 @@ class Thread_Trimitere(Thread):
 class Thread_Primire(Thread):
     # variabila de conditie pentru primirea din socket
     stare_primire = Condition()
+    coada_ACK=[]
 
     def __init__(self, interfata):
         # apelez constructorul din clasa parinte
@@ -68,9 +90,27 @@ class Thread_Primire(Thread):
                 contor = contor + 1
             else:
                 data, address = s_u.Socket_Utile.UDPServerSocket.recvfrom(s_u.Socket_Utile.bufferSize)
-                print("S-a receptionat ", str(data), " de la ", address)
-                self.interfata.update_label_ACK(str(data))
-                print("Contor= ", contor)
+                # preia data primita ca fiind string
+                sir=str(data)
+                sir = sir.split('%')
+                sir = sir[1]
+                # actualizez pe interfata
+                self.interfata.update_label_ACK(sir)
+                # pun in coada de prelucrare
+                Thread_Primire.coada_ACK=Thread_Primire.coada_ACK+ [sir]
+                # dau lock thread-ul de prelucrare de ACk
+                tpa.Thread_Prelucrare_ACK.stare_prelucrare_ACK.acquire()
+                # il notific
+                tpa.Thread_Prelucrare_ACK.stare_prelucrare_ACK.notify()
+                # eliberez lock
+                tpa.Thread_Prelucrare_ACK.stare_prelucrare_ACK.release()
 
             # eliberez lock
             Thread_Primire.stare_primire.release()
+
+
+def prelucrare_ACK(sir):
+    # eu am sirul de caractere si scot numarul pachetului confirmat
+    pass
+
+
