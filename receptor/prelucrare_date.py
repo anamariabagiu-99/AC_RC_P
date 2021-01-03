@@ -1,7 +1,9 @@
 from threading import Thread
 from threading import Condition
 import socket_com as s_c
-
+import interfata_grafica as i_g
+import time
+import random
 
 class Prelucrare_date:
     @staticmethod
@@ -42,6 +44,26 @@ class Prelucrare_date:
             nr = nr*10 + int(c)
         #print(nr+1)
         return nr
+    @staticmethod
+    def trimit_sau_nu():
+        # scot probabiliatea introdusa
+        p=i_g.InterfataGrafica.probabilitatea[0]
+        print('p=' +str(i_g.InterfataGrafica.probabilitatea) )
+        # generez aleator un nr
+        nr=random.random()
+        # verific unde se situeaza acesta fata de probabilitatea
+        # introdusa de utilizator
+        if(nr<p):
+            # trimit confirmare
+            print(nr)
+            print('trimit')
+            return True
+        else:
+            print(nr)
+            print(' nu trimit')
+            return False
+
+
 
 
 class Thread_date(Thread):

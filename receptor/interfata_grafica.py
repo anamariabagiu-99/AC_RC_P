@@ -1,8 +1,10 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
 import socket_utile as s_u
 
 class InterfataGrafica:
+    probabilitatea = []
     def __init__(self):
         #creez fereastra
         self.i = Tk()
@@ -28,7 +30,8 @@ class InterfataGrafica:
         # pentru prob la care se pierd pachetele
         self.label_p = self.create_label("Introduceti probabilitatea de forma a/b",
                          50, 150)
-        self.p = Entry(self.i).place(x=450, y=150)
+        self.p = Entry(self.i)
+        self.p.place(x=450, y=150)
 
     def design_win(self):
 
@@ -43,7 +46,7 @@ class InterfataGrafica:
         #butonul de start
         # trebuie sa adaug o comanda pentru a incepe transmiterea
         self.start = Button(self.i, text='Start', fg='black', bg='plum', width=15, height=2,
-                            command=s_u.Socket_Utile.initializare)
+                            command=self.partea_de_start)
 
         #butonul pentru inchiderea interfetei
         self.stop = Button(self.i, text='Stop', fg='black', bg='plum',
@@ -80,3 +83,27 @@ class InterfataGrafica:
 
     def update_label_ACK(self, nr):
         self.text_inf.insert(END, '\n\n Am trimis ACK pentru pachetul \t'+nr)
+
+
+    def partea_de_start(self):
+        # scot de pe interfata probabilitatea
+        sir=self.p.get()
+        # verfic ca acesta are forma pe care o vreau
+        if not(sir[0]>='0 ' and sir[0]<='9' and sir[1]=='/' and sir[2]>='0' and sir[2]<='9'):
+            messagebox.showinfo('Eroare', 'Probabilitatea trebuie sa aiba forma a/b.')
+            self.p.delete(0, END)
+            return
+        # verific ca probabilitatea sa fie subunitara
+        if not(sir[0]< sir[2]):
+            messagebox.showinfo('Eroare', 'Probabilitatea trebuie sa fie subunitara!\n'
+                                          'a < b')
+            self.p.delete(0, END)
+            return
+        # daca am trecut de partea de validare, calculez probabilitatea
+        InterfataGrafica.probabilitatea.insert(0, int(sir[0])/int(sir[2]))
+        #InterfataGrafica.probabilitatea.insert()
+        print('din interfata '+str(InterfataGrafica.probabilitatea[0]))
+        # creez legatura cu socketul
+        s_u.Socket_Utile.initializare()
+
+
