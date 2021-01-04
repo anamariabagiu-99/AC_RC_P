@@ -5,6 +5,7 @@ import interfata_grafica as i_g
 import time
 import random
 
+
 class Prelucrare_date:
     @staticmethod
     def prelucrare(sir):
@@ -44,6 +45,7 @@ class Prelucrare_date:
             nr = nr*10 + int(c)
         #print(nr+1)
         return nr
+
     @staticmethod
     def trimit_sau_nu():
         # scot probabiliatea introdusa
@@ -53,17 +55,15 @@ class Prelucrare_date:
         nr=random.random()
         # verific unde se situeaza acesta fata de probabilitatea
         # introdusa de utilizator
-        if(nr<p):
+        if nr < p :
             # trimit confirmare
             print(nr)
             print('trimit')
-            return True
+            return False
         else:
             print(nr)
             print(' nu trimit')
-            return False
-
-
+            return True
 
 
 class Thread_date(Thread):
