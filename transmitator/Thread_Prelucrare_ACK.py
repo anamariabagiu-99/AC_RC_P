@@ -18,7 +18,8 @@ class Thread_Prelucrare_ACK(Thread):
             # primesc lock
             Thread_Prelucrare_ACK.stare_prelucrare_ACK.acquire()
             # astept cat timp coada de ACK e goala
-            if len(sc.Thread_Primire.coada_ACK)==0:
+
+            if len(sc.Thread_Primire.coada_ACK) == 0:
                 Thread_Prelucrare_ACK.stare_prelucrare_ACK.wait()
             # daca am in coada prelucrez
             else:
@@ -39,18 +40,19 @@ class Thread_Prelucrare_ACK(Thread):
                         # daca cele 2 siruri sunt egale, atunci scot din coada pachetul pentru
                         # acesta primit confirmare
                         p=ta.Tahoe_Algoritm.coada_pachete_neconfirmate.pop(i)
+                        ta.Tahoe_Algoritm.coada_ut_conf[0] = p
                         #print(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)
                         # i=len(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)+1
                         break
                 #print(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)
                 # verific daca nu mai am nimic in coada de pachete trimise, dar inca neconfirmate
-                if(len( ta.Tahoe_Algoritm.coada_pachete_neconfirmate)==0):
+                if(len( ta.Tahoe_Algoritm.coada_pachete_neconfirmate) == 0):
                     # daca nu mai am pot sa cresc dimensiunea ferestrei de congestie
                     #print('Am intrat in if-ul de jos')
                     #print(ta.Tahoe_Algoritm.cwnd)
                     ta.Tahoe_Algoritm.slow_start()
                     #print(ta.Tahoe_Algoritm.cwnd)
-        Thread_Prelucrare_ACK.stare_prelucrare_ACK.release
+        Thread_Prelucrare_ACK.stare_prelucrare_ACK.release()
 
 
 

@@ -6,7 +6,7 @@ import socket_utile_c as s_u
 
 class Prelucrare_fisier:
     # setez dimenisiunea unui pachet
-    dim_pachet=15
+    dim_pachet=2
     # coada pentru siruri
     coada_siruri=[]
     numar_pachet=0
