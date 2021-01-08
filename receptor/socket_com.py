@@ -15,6 +15,7 @@ class Thread_Trimitere_ACK(Thread):
     coada_nu_ACK=[]
     ultima_ACK=['%0%']
     coada_index = [0]
+    am_t_d = False
 
     def __init__(self, interfata):
         # apelez constructorul din clasa parinte
@@ -35,31 +36,58 @@ class Thread_Trimitere_ACK(Thread):
                 if Thread_Trimitere_ACK.ultima_ACK[0] != Thread_Trimitere_ACK.coada_ACK[0]:
                     self.ACK_netrimise()
                 # in cazul in care nu am blocat trimiterea ACK, trimit pe socket
+                print("coada ACK de trimis")
+                print(Thread_Trimitere_ACK.coada_ACK)
                 if(len(Thread_Trimitere_ACK.coada_ACK) and not(Thread_Trimitere_ACK.trimit_ACK) ):
+                    print("Trimit normal")
                     string = Thread_Trimitere_ACK.coada_ACK.pop(0)
+                    sir = string
+                    print("Trimit "+ sir)
                     string='%'+string +'%'
                     s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                             (s_u.Socket_Utile.localIP, 20001))
                     # actualizez ultima ACK
-                    #Thread_Trimitere_ACK.ultima_ACK.insert(0,string )
-                    self.i.update_label_ACK(string)
+                    Thread_Trimitere_ACK.ultima_ACK.insert(0 , string)
+                    self.i.update_label_ACK(sir)
                 else:
                     # trimit patru copii pentru ultima ACK, pentru cazul in carea m blocat trimiterea
-                    if Thread_Trimitere_ACK.coada_index[0] < 4:
+                    '''if Thread_Trimitere_ACK.coada_index[0] < 4:
+                        print("Trimit cele 4 ACK DUPLICATE")
                         string = Thread_Trimitere_ACK.ultima_ACK[0]
+                        print("TRIMIT "+ string)
+                        sir = string
                         string = '%' + string + '%'
                         s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                                 (s_u.Socket_Utile.localIP, 20001))
-
-                        self.i.update_label_ACK(string)
                         # actualizez contorul
                         Thread_Trimitere_ACK.coada_index[0] = Thread_Trimitere_ACK.coada_index[0] + 1
+                        self.i.update_label_ACK(sir)
+
                     else:
                         # am terminat de trimis copiile si las coada de ACK vida
                         Thread_Trimitere_ACK.coada_ACK=[]
                         Thread_Trimitere_ACK.coada_index[0] = 0
+                        print("am terminat cu duplicatele")
+                        print(' Din thread trimitere coada de pachete arata :')
+                        print(Thread_Primire_Date.coada_pachete)
+                        self.i.update_label_ACK("AM TERMINAT DE TRIMIS COPIILE")
+                        Thread_Primire_Date.coada_pachete = []'''
+                    Thread_Trimitere_ACK.am_t_d = True
+                    string = Thread_Trimitere_ACK.ultima_ACK[0]
+                    sir = string
+                    string = '%' + string + '%'
+                    for i in range(0, 4):
+                        print("TRIMIT " + string)
+                        s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
+                                                                (s_u.Socket_Utile.localIP, 20001))
+                        # actualizez contorul
+                        Thread_Trimitere_ACK.coada_index[0] = Thread_Trimitere_ACK.coada_index[0] + 1
+                        self.i.update_label_ACK(sir)
+                    Thread_Trimitere_ACK.coada_ACK = []
+                    Thread_Primire_Date.coada_pachete = []
+                    Thread_Trimitere_ACK.am_t_d = False
 
-                        # eliberez lock
+                        # eliberez lock'''
                 Thread_Trimitere_ACK.stare_ACK.release()
 
     # functie pentru ACK netrimise
@@ -71,18 +99,16 @@ class Thread_Trimitere_ACK(Thread):
             Thread_Trimitere_ACK.trimit_ACK=p_d.Prelucrare_date.trimit_sau_nu()
             # daca deja am hotarat ca nu mai trimit pachete,
             # nu mai apelez functia
-        print(Thread_Trimitere_ACK.trimit_ACK )
-        if Thread_Trimitere_ACK.trimit_ACK:
-            # daca am oprit trimiterea ACK, mut tot in coada de ACK netrimise
-            # pun si ultima ACK trimis
-            Thread_Trimitere_ACK.ultima_ACK [0] = Thread_Trimitere_ACK.coada_ACK [0]
-           # Thread_Trimitere_ACK.coada_nu_ACK  = Thread_Trimitere_ACK.coada_nu_ACK +Thread_Trimitere_ACK.ultima_ACK
-            for i in (0, len(Thread_Trimitere_ACK.coada_ACK)-1):
-                if (Thread_Trimitere_ACK.coada_ACK) :
-                    x=Thread_Trimitere_ACK.coada_ACK[i]
-                    # fac asta pentru a putea trimite ACK
-                    Thread_Trimitere_ACK.coada_nu_ACK.append(x)
-            print('AM MUTAT TOT!!!!!!!!!!!')
+            print(Thread_Trimitere_ACK.trimit_ACK)
+            if Thread_Trimitere_ACK.trimit_ACK:
+                # daca am oprit trimiterea ACK, mut tot in coada de ACK netrimise
+                # pun si ultima ACK trimis
+                print("TRIMIT CERERE DUPLICAT PENTRU "+Thread_Trimitere_ACK.coada_ACK [0])
+                Thread_Trimitere_ACK.ultima_ACK [0] = Thread_Trimitere_ACK.coada_ACK [0]
+                print("am blocat trimiterea")
+                Thread_Primire_Date.coada_pachete =[]
+
+
 
 
 class Thread_Primire_Date(Thread):
@@ -116,6 +142,7 @@ class Thread_Primire_Date(Thread):
                     self.deblocare_trimitere(str(data))
                 #pun in coada inf citite din socket
                 Thread_Primire_Date.coada_pachete.append(str(data))
+                print("AM PRIMIT "+ str(data))
 
                 print(Thread_Trimitere_ACK.trimit_ACK)
                 # self.deblocare_trimitere()
@@ -128,38 +155,27 @@ class Thread_Primire_Date(Thread):
                 # o alta cale de sincronizare
 
                 # actualizez inf de pe interfata
-                self.interfata.update_label_packet(str(data))
+
+                sir = p_d.Prelucrare_date.nr_pachet(str(data))
+                self.interfata.update_label_packet(sir)
             Thread_Primire_Date.stare_primire_date.release()
 
     def deblocare_trimitere(self, sir ):
         print('am intrat in fct de deblocare')
+        Thread_Trimitere_ACK.trimit_ACK = False
+        print(' Din fct de deblocare coada de pachete arata :')
+        print(Thread_Primire_Date.coada_pachete)
+        print(Thread_Trimitere_ACK.trimit_ACK)
+        print("coada ACK")
+        print(Thread_Trimitere_ACK.coada_ACK)
         # parcurg lista pentru care nu am trimis inapoi ACK
         # si daca primesc un pachet care se afla in aceasta lista, deblochez
         # procesul de trimitere a pachetelor
-        '''for x in Thread_Primire_Date.coada_pachete:
-            # aplic procesul de despachetare a datelor
-            if  not (siruri_egale(x[0], '%0%')):
-                l = p_d.Prelucrare_date.prelucrare(x)'''
-                # parcurg lista de ACK netrimise
-        l = p_d.Prelucrare_date.prelucrare(sir)
-        for y in Thread_Trimitere_ACK.coada_nu_ACK:
-                    # daca gasesc pachetul acolo, insemna ca am trimis din nou si
-                    # trebuie sa modific starea trimiterii
-            s = y.split('%')
-            s = s[0]
-            print('sir din deblocare ' + s)
-            if siruri_egale(l[0], s):
-                print('AM intrat pe 2 pachete egale si deblochez')
-                Thread_Trimitere_ACK.trimit_ACK = False
 
 
-def siruri_egale(s1, s2):
-    if len(s1) !=  len(s2):
-        return False
-    for i  in (0, len(s1)-1):
-        if s1[i] != s2[i]:
-            return False
-    return True
+
+
+
 
 # TODO revezi partea aceasta de cod
 

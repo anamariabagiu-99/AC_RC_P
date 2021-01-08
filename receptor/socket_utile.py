@@ -1,4 +1,6 @@
+
 import socket
+import interfata_grafica as i_g
 import socket_com as s_c
 
 class Socket_Utile:
@@ -20,7 +22,9 @@ class Socket_Utile:
         Socket_Utile.UDPServerSocket = socket.socket(family=socket.AF_INET,
                                                      type=socket.SOCK_DGRAM)
         # fac bind
-        Socket_Utile.UDPServerSocket.bind((Socket_Utile.localIP, 1089))
+        s = i_g.InterfataGrafica.port[0]
+        # 1089
+        Socket_Utile.UDPServerSocket.bind((Socket_Utile.localIP, s))
 
         # dau drumul la threadul de primire a datelor
         s_c.Thread_Primire_Date.stare_primire_date.acquire()

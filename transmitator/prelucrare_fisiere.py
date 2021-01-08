@@ -6,7 +6,7 @@ import socket_utile_c as s_u
 
 class Prelucrare_fisier:
     # setez dimenisiunea unui pachet
-    dim_pachet=2
+    dim_pachet = 2
     # coada pentru siruri
     coada_siruri=[]
     numar_pachet=0
@@ -21,6 +21,7 @@ class Prelucrare_fisier:
         #print(text)
         # inchid fisierul
         c.close()
+
         # apelez functia pentru spargerea fisierului in bucatele mai mici
         Prelucrare_fisier.spargere_fisier(sir=text)
         # returnez fisierul citit
@@ -31,7 +32,7 @@ class Prelucrare_fisier:
         # despart continutul fisierului in bucatele micute
         pas=Prelucrare_fisier.dim_pachet
         # parcurg sirul cu pas si pun in coada
-        coada_siruri = []
+        coada_siruri = [] # pun primul elem din coada calea
         for i in range(pas, len(sir)+pas, pas):
             s=sir[i-pas:i]
             #print(s)
@@ -66,6 +67,17 @@ class Prelucrare_fisier:
         print(Prelucrare_fisier.nr_pachet)
         return vector
 
+    @staticmethod
+    def pachet_start_stop(sir, f):
+        nume_f = sir.split('/')
+        nume_f = nume_f[-1]
+        if f==1:
+            # impachetam pachetul de start
+            s = '*START*'+ nume_f
+        else:
+            # impachetez pachetul de stop
+            s = '*STOP*'+ nume_f
+        return s
 
 
 class Thread_Prelucrare(Thread):
@@ -88,11 +100,20 @@ class Thread_Prelucrare(Thread):
                 Thread_Prelucrare.stare_citire.wait()
             # prelucrez urmatorul elem din coada
             if len(Thread_Prelucrare.coada_fisiere):
-                sir=Prelucrare_fisier.citire_fisier(Thread_Prelucrare.coada_fisiere.pop(0))
-
+                # scot din coada prima cale spre un fisier
+                cale =Thread_Prelucrare.coada_fisiere.pop(0)
+                sir=Prelucrare_fisier.citire_fisier(cale)
+                # prelucrez si pun in coada pachetul de start
+                s = Prelucrare_fisier.pachet_start_stop(cale, 1)
+                # adaug pachetul de start
+                Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
                 pachete=Prelucrare_fisier.impachetare_continut(sir)
                 # pun in coada de pachete
                 Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + pachete
+                # dupa ce am pus toate pachetele corespunzatoare, adaug pachetul de stop
+                s = Prelucrare_fisier.pachet_start_stop(cale, 2)
+                # adaug pachetul de stop
+                Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
 
                 if s_u.Socket_Utile.flag:
                     #  anunt thread-ul de trimitere ca poate sa isi inceapa treaba

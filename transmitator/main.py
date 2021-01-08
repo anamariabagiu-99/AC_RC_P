@@ -6,6 +6,9 @@ from Thread_Prelucrare_ACK import *
 from socket_utile_c import *
 
 if __name__ == '__main__':
+    sir = '*start*ana'
+    s= sir.split('*')
+    print(s)
     r = InterfataGrafica()
     t_trimitere = Thread_Trimitere()
     t_primire = Thread_Primire(r)

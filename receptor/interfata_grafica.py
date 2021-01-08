@@ -1,60 +1,125 @@
 from tkinter import *
-from tkinter import filedialog
 from tkinter import messagebox
+
+import Design as d
+import prelucrare_interfata as p_i
 import socket_utile as s_u
+import text as t
+
 
 class InterfataGrafica:
-    probabilitatea = []
+    probabilitatea = [] # prob va fi citita din interfata grafica
+    port = [] # portul va fi introdus de utilizator
     def __init__(self):
         #creez fereastra
         self.i = Tk()
-
         #aleg designul pentru interfata
         self.design_win()
-
+        # eticheta titlul
+        self.eticheta_titlu = Label(self.i, text=t.my_text.start, bg=d.Design.eticheta_titlu,
+                                    fg=d.Design.culoare_scris,
+                                    font=('Arial', 50, 'bold')
+                                    )
+        # eticheta subtitulul
+        self.eticheta_subtitlul = Label(self.i, text=t.my_text.t, bg=d.Design.eticheta_titlu,
+                                        fg=d.Design.culoare_scris,
+                                        font=('Arial', 30, 'bold')
+                                        )
+        # eticheta port
+        self.e_port = Label(self.i, text='Port', bg=d.Design.culoarea_back,
+                            fg=d.Design.culoare_scris,
+                            font=('Arial', 20, 'bold'))
+        # voi lasa utilizatorul sa introduca nr portului
+        self.e_port_i = Entry(self.i , bg=d.Design.culoarea_back,
+                       fg=d.Design.culoare_scris,
+                       font=('Arial', 20, 'bold')
+                       )
+        # pentru prob la care se pierd pachetele
+        self.label_p =  Label(self.i, text='Introduceti probabilitatea de forma a/b', bg=d.Design.culoarea_back,
+                            fg=d.Design.culoare_scris,
+                            font=('Arial', 20, 'bold'))
+        self.p = Entry(self.i , bg=d.Design.culoarea_back,
+                       fg=d.Design.culoare_scris,
+                       font=('Arial', 20, 'bold')
+                       )
         #creez butoanele
         self.design_button()
-
-        #casetele text
-        self.text_box=self.text_box_create(30, 300)
-        self.text_inf=self.text_box_create(480, 300)
-
-        #etchetele
-        self.label_text_box=self.create_label("Informatii pachete primite", 50,270 )
-        self.label_text_inf=self.create_label("Informatii ACK trimise", 500, 270)
-
-        #eticheta port
-        self.label_port=self.create_label("Port", 10, 40)
-        self.port=Label(self.i,text="text", bg='orchid', font=('verdana', 15) ).place(x=65, y=40)
-
-        # pentru prob la care se pierd pachetele
-        self.label_p = self.create_label("Introduceti probabilitatea de forma a/b",
-                         50, 150)
-        self.p = Entry(self.i)
-        self.p.place(x=450, y=150)
+        # un radiobutton care sa imi spuna cum este conexiunea cu socketul
+        # inchisa sau deschisa
+        self.var = IntVar()  # variabila care o sa spuna cum este conexiunea
+        self.deschis = Radiobutton(self.i, text="Conexiune deschisa!", variable=self.var,
+                                   value=1, bg=d.Design.culoarea_back,
+                                   fg=d.Design.culoare_scris,
+                                   font=('Arial', 14, 'bold'))
+        self.inchis = Radiobutton(self.i, text="Conexiune inchisa!", variable=self.var,
+                                  value=2, bg=d.Design.culoarea_back,
+                                  fg=d.Design.culoare_scris,
+                                  font=('Arial', 14, 'bold'))
+        # conexiunea este initial inchisa
+        self.var.set(2)
+        # casetele text pentru afisarea inf despre pachete
+        self.label_text_box = Label(self.i, text='Informatii pachete primite:', bg=d.Design.culoarea_back,
+                                    fg=d.Design.culoare_scris,
+                                    font=('Arial', 20, 'bold'))
+        self.label_text_inf = Label(self.i, text='Informatii ACK trimise:', bg=d.Design.culoarea_back,
+                                    fg=d.Design.culoare_scris,
+                                    font=('Arial', 20, 'bold'))
+        self.text_box = Text(self.i, bg=d.Design.culoare_inf,
+                             fg=d.Design.culoare_scris_inf,
+                             font=('Arial', 15, 'bold'),
+                             width=30, height=15)
+        self.text_inf = Text(self.i, bg=d.Design.culoare_inf,
+                             fg=d.Design.culoare_scris_inf,
+                             font=('Arial', 15, 'bold'),
+                             width=30, height=15)
+        # creez meniu
+        self.meniu = Menu(self.i)
+        self.filemenu = Menu(self.meniu)
+        self.filemenu.add_command(label='Despre', command=self.meniu_about)
+        self.filemenu.add_command(label='Ajutor', command=self.meniu_help)
+        self.meniu.add_cascade(label="Meniu", menu=self.filemenu)
+        self.meniu.config(bg=d.Design.back_meniu)
+        self.i.config(menu=self.meniu)
+        self.plasare_gui()
 
     def design_win(self):
-
         # setez titlul
-        self.i.title("Receiver")
+        self.i.title("Receptor")
         # setez dimenisiunea
-        self.i.geometry("900x900")
+        self.i.geometry("800x800")
         # setez culoare bck
-        self.i.configure(bg="lavenderblush")
+        self.i.configure(bg=d.Design.culoarea_back)
+
+    def plasare_gui(self):
+        # fct pentru plasarea pe gui
+        self.eticheta_titlu.place(x=100, y=10)
+        self.eticheta_subtitlul.place(x=250, y=100)
+        self.e_port.place(x=100, y=175)
+        self.e_port_i.place(x=200, y=175)
+        self.label_p.place(x=30, y=225)
+        self.p.place(x=525, y=225)
+        self.deschis.place(x=100, y=700)
+        self.inchis.place(x=475, y=700)
+        self.label_text_box.place(x=50, y=275)
+        self.text_box.place(x=50, y=310)
+        self.label_text_inf.place(x=425, y=275)
+        self.text_inf.place(x=425, y=310)
 
     def design_button(self):
         #butonul de start
         # trebuie sa adaug o comanda pentru a incepe transmiterea
-        self.start = Button(self.i, text='Start', fg='black', bg='plum', width=15, height=2,
+        self.start = Button(self.i, text='Deschire conexiune', fg=d.Design.culoare_scris,
+                            bg=d.Design.culoare_butoane, width=20, height=2,
                             command=self.partea_de_start)
 
         #butonul pentru inchiderea interfetei
-        self.stop = Button(self.i, text='Stop', fg='black', bg='plum',
-                           width=15, height=2, command=self.i.destroy)
+        self.stop = Button(self.i, text='Inchidere conexiune',
+                          fg=d.Design.culoare_scris, bg=d.Design.culoare_butoane,
+                           width=20, height=2,command=self.call_stop)
 
         #setez coordonatele
-        self.start.place(x=250, y=840)
-        self.stop.place(x=500, y=840)
+        self.start.place(x=100, y=740)
+        self.stop.place(x=475, y=740)
 
     def start_interface(self):
         #bucla pentru interfata
@@ -78,32 +143,41 @@ class InterfataGrafica:
 
     #functiile pentru update ale casetelor text
     def update_label_packet(self, text):
-        self.text_box.insert(END, 'Am primit pachetul \t'+text+'\n\n')
+        self.text_box.insert(END, 'Pachet <-'+text+'\n')
 
 
     def update_label_ACK(self, nr):
-        self.text_inf.insert(END, '\n\n Am trimis ACK pentru pachetul \t'+nr)
+        self.text_inf.insert(END, 'ACK -> '+nr+'\n')
 
 
     def partea_de_start(self):
         # scot de pe interfata probabilitatea
         sir=self.p.get()
-        # verfic ca acesta are forma pe care o vreau
-        if not(sir[0]>='0 ' and sir[0]<='9' and sir[1]=='/' and sir[2]>='0' and sir[2]<='9'):
-            messagebox.showinfo('Eroare', 'Probabilitatea trebuie sa aiba forma a/b.')
+        if not(p_i.prelucrare_inf_int.prelucrare_prob(sir)):
             self.p.delete(0, END)
             return
-        # verific ca probabilitatea sa fie subunitara
-        if not(sir[0]< sir[2]):
-            messagebox.showinfo('Eroare', 'Probabilitatea trebuie sa fie subunitara!\n'
-                                          'a < b')
-            self.p.delete(0, END)
+        sir =  self.e_port_i.get()
+        if not(p_i.prelucrare_inf_int.validare_port(sir)):
+            self.e_port_i.delete(0, END)
             return
-        # daca am trecut de partea de validare, calculez probabilitatea
-        InterfataGrafica.probabilitatea.insert(0, int(sir[0])/int(sir[2]))
-        #InterfataGrafica.probabilitatea.insert()
-        print('din interfata '+str(InterfataGrafica.probabilitatea[0]))
+        sir = p_i.prelucrare_inf_int.numar(sir)
+        InterfataGrafica.port.append(sir)
+        self.var.set(1)
         # creez legatura cu socketul
         s_u.Socket_Utile.initializare()
+
+
+
+    def call_stop(self):
+        self.var.set(2)
+
+
+# functii pentru afisarea de inf din meniu
+    def meniu_help(self):
+        messagebox.showinfo(title="Ajutor", message=t.my_text.help)
+
+    def meniu_about(self):
+        messagebox.showinfo(title="Despre", message=t.my_text.despre)
+
 
 

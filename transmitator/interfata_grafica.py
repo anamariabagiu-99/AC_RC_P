@@ -1,71 +1,140 @@
+import Design as d
+import text as t
+
 from prelucrare_fisiere import *
 from socket_utile_c import *
-from threading import Condition
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
-import socket_comunicare as s_c
 
 
 class InterfataGrafica:
     def __init__(self):
         #creez fereastra
         self.i = Tk()
-
         #aleg designul pentru interfata
         self.design_win()
-
         #creez butoanele
         self.design_button()
+        # eticheta titlul
+        self.eticheta_titlu = Label(self.i, text=t.my_text.start, bg=d.Design.eticheta_titlu,
+                                    fg=d.Design.culoare_scris,
+                                    font=('Arial', 50, 'bold')
+                                    )
+        self.eticheta_subtitlul = Label(self.i, text=t.my_text.t, bg=d.Design.eticheta_titlu,
+                                    fg=d.Design.culoare_scris,
+                                    font=('Arial', 30, 'bold')
+                                    )
+        # eticheta port
+        self.e_port = Label(self.i, text='Port', bg=d.Design.culoarea_back,
+                                    fg=d.Design.culoare_scris,
+                                    font=('Arial', 20, 'bold'))
+        self.e_port_i = Label(self.i, text=Socket_Utile.localPort, bg=d.Design. culoare_port,
+                            fg=d.Design.culoare_scris,
+                            font=('Arial', 20, 'bold'))
+        # butonul pentru rasfoire
+        self.fisier =  Label(self.i, text = 'Alegeti un fisier folosind butonul ', bg=d.Design.culoarea_back,
+                            fg=d.Design.culoare_scris,
+                            font=('Arial', 20, 'bold'))
+        self.browse_button = self.browse(500, 225)
 
-        #casetele text
-        self.text_box=self.text_box_create(30, 300)
-        self.text_inf=self.text_box_create(480, 300)
+        #butoanele de stop si start
+        self.design_button()
+        # un radiobutton care sa imi spuna cum este conexiunea cu socketul
+        # inchisa sau deschisa
+        self.var = IntVar() # variabila care o sa spuna cum este conexiunea
+        self.deschis = Radiobutton(self.i, text="Conexiune deschisa!", variable=self.var,
+                                      value=1, bg=d.Design.culoarea_back,
+                                      fg=d.Design.culoare_scris,
+                                      font=('Arial', 14, 'bold'))
+        self.inchis = Radiobutton(self.i, text="Conexiune inchisa!", variable=self.var,
+                                   value=2, bg=d.Design.culoarea_back,
+                                   fg=d.Design.culoare_scris,
+                                   font=('Arial', 14, 'bold'))
+        # conexiunea este initial inchisa
+        self.var.set(2)
 
-        #etichetele
-        self.label_text_box=self.create_label("Informatii fisiere deschise", 50,270 )
-        self.label_text_inf=self.create_label("Informatii ACK primite", 500, 270)
+        # creez casetele in care voi afisa informatiile despre pachete
+        self.label_text_box = Label(self.i, text = 'Informatii fisiere deschise:', bg=d.Design.culoarea_back,
+                            fg=d.Design.culoare_scris,
+                            font=('Arial', 20, 'bold'))
+        self.label_text_inf = Label(self.i, text = 'Informatii ACK primite:', bg=d.Design.culoarea_back,
+                            fg=d.Design.culoare_scris,
+                            font=('Arial', 20, 'bold'))
+        self.text_box = Text(self.i, bg=d.Design.culoare_inf,
+                            fg=d.Design.culoare_scris_inf,
+                            font=('Arial', 15, 'bold'),
+                             width=30, height=15)
+        self.text_inf = Text(self.i, bg=d.Design.culoare_inf,
+                            fg=d.Design.culoare_scris_inf,
+                            font=('Arial', 15, 'bold'),
+                             width=30, height=15)
+        # creez meniu
+        self.meniu = Menu(self.i)
+        self.filemenu = Menu(self.meniu)
+        self.filemenu.add_command(label='Despre', command=self.meniu_about)
+        self.filemenu.add_command(label='Ajutor', command=self.meniu_help)
+        self.meniu.add_cascade(label="Meniu", menu=self.filemenu)
+        self.meniu.config(bg=d.Design.back_meniu)
+        self.i.config(menu=self.meniu)
 
-        #eticheta port
-        self.label_port=self.create_label("Port", 10, 40)
-        self.port=Label(self.i,text="text", bg='steelblue', font=('verdana', 15) ).place(x=65, y=40)
+        # plasez elementele pe gui
+        self.plasare_gui()
+        # contor pentru numarul de fisiere deschise
+        self.contor = 0
 
-        #butonul de broswe
-        self.label_file = self.create_label("Pentru a alege fisierul folositi bu"
-                                            "tonul", 50, 150)
-        self.browse_button=self.browse(500, 150)
-        # il folosesc pentru a scoate calea spre fisiere
-        self.cale= ""
-
-        # folosesc o variabile contor in care sa retin nr de fisiere deschise
-        self.contor=0
 
     def design_win(self):
         # setez titlul
-        self.i.title("Sender")
+        self.i.title("Emitator")
         # setez dimenisiunea
-        self.i.geometry("900x900")
+        self.i.geometry("800x800")
         # setez culoare bck
-        self.i.configure(bg="lightseagreen")
+        self.i.configure(bg=d.Design.culoarea_back)
+
+    def plasare_gui(self):
+        # plasez elementele create pe gui
+        self.eticheta_titlu.place(x=100, y=10)
+        self.eticheta_subtitlul.place(x=250, y=100)
+        self.e_port.place(x=100, y=175)
+        self.e_port_i.place(x=200, y=175)
+        self.fisier.place(x=75, y=225)
+        self.deschis.place(x=100, y=700)
+        self.inchis.place(x=475, y=700)
+        self.label_text_box.place(x=50, y=275)
+        self.text_box.place(x=50, y=310)
+        self.label_text_inf.place(x=425, y=275)
+        self.text_inf.place(x = 425, y = 310)
 
     def design_button(self):
         # butonul de start, am o comanda pentru a incepe transmiterea
-        self.start = Button(self.i, text='Start', fg='black', bg='cornflowerblue', width=15, height=2,
-                            command=Socket_Utile.initializare)
+        self.start = Button(self.i, text='Deschire conexiune', fg=d.Design.culoare_scris,
+                            bg=d.Design.culoare_butoane, width=20, height=2,
+                            command=self.call_start)
 
         # butonul pentru inchiderea interfetei
-        self.stop = Button(self.i, text='Stop', fg='black', bg='cornflowerblue', width=15, height=2, command=self.i.destroy)
+        self.stop = Button(self.i, text='Inchidere conexiune',
+                          fg=d.Design.culoare_scris, bg=d.Design.culoare_butoane,
+                           width=20, height=2,command=self.call_stop)
+        # TODO de verificat daca nu exista ceva pentru inchiderea conexiunii
 
         #setez coordonatele
-        self.start.place(x=250, y=840)
-        self.stop.place(x=500, y=840)
+        self.start.place(x=100, y=740)
+        self.stop.place(x=475, y=740)
+
+    def call_start(self):
+        self.var.set(1)
+        Socket_Utile.initializare()
+
+    def call_stop(self):
+        self.var.set(2)
+        s_u.Socket_Utile.UDPServerSocket.shutdown()
 
     def start_interface(self):
         # bucla pentru interfata
         if(s_u.Socket_Utile.flag ):
             s_c.receive_fct()
         self.i.mainloop()
-
 
     def browse(self, k, y):
         x = Button(self.i, text='Rasfoire',fg='black', bg='cyan',
@@ -98,26 +167,17 @@ class InterfataGrafica:
         # cand deschid un fisier fac update la inf de pe caseta text
         self.update_label_open_file(input.name)
 
-
-    def text_box_create(self, x, y):
-        #creez caseta text
-        text_box=Text(self.i, width=50, height=30, bg='lightskyblue')
-        text_box.place(x=x, y=y)
-        return text_box
-
-    def create_label(self, text, x, y):
-        #creez etichete
-        l1=Label(self.i, text=text, bg='lightseagreen', font=('verdana', 15) )
-        l1.place(x=x, y=y)
-        return l1
-
     # functiile pentru update ale casetelor text
     def update_label_open_file(self, text):
-        self.text_box.insert(END, 'Am deschis fisierul \t'+text+'\n\n')
+        self.text_box.insert(END, 'Fisier deschis: \t'+text+'\n')
 
     def update_label_ACK(self, nr):
-        self.text_inf.insert(END, '\n\n Am primit ACK pentru pachetul \t'+nr)
+        self.text_inf.insert(END, 'ACK <-'+nr+'\n')
 
-    def stop_button(self):
-        s_u.Socket_Utile.UDPServerSocket.shutdown()
+    # functii pentru afisarea de inf din meniu
+    def meniu_help(self):
+        messagebox.showinfo(title="Ajutor", message=t.my_text.help)
+
+    def meniu_about(self):
+        messagebox.showinfo(title="Despre", message=t.my_text.despre)
 
