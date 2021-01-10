@@ -21,15 +21,18 @@ class prelucrare_inf_int:
 
     @staticmethod
     def alcatuit_cifre(sir):
+        # fct ce verifica ca un sir sa fie alcatuit doar din cifre
         for x in sir:
             if not (x >= '0' and x <= '9'):
                 return False
         return True
 
     @staticmethod
-    def numar(sir, nr=None):
+    def numar(sir):
+        # fct care face transformarea din sir in nr intreg
         nr = 0
         for x in sir:
+            # aplic formula de la matematica
             nr = nr*10 + int(x)
         return nr
 
@@ -46,12 +49,14 @@ class prelucrare_inf_int:
             messagebox.showinfo('Eroare', s)
             return False
         # valoarea calculata sa fie subunitara
+        # transform cele 2 siruri in numere
         nr1 = prelucrare_inf_int.numar(lista[0], 0)
         nr2 = prelucrare_inf_int.numar(lista[1], 0)
-        p = nr1 /nr2
+        p = nr1 /nr2 # calc probabilitatea
         if(p > 1):
             s =' Probilitatea trebuie sa fie subunitara pentru asta a < b.'
             messagebox.showinfo('Eroare', s)
             return False
+        # o adaug in coada de la gui
         i_g.InterfataGrafica.probabilitatea.append(p)
         return True

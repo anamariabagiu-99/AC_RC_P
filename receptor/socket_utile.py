@@ -17,7 +17,7 @@ class Socket_Utile:
         if Socket_Utile.flag == True:
             exit
         # setez flagul
-        Socket_Utile.flag=True
+        Socket_Utile.flag = True
         # realizez conexiunea pe socket
         Socket_Utile.UDPServerSocket = socket.socket(family=socket.AF_INET,
                                                      type=socket.SOCK_DGRAM)

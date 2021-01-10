@@ -10,12 +10,11 @@ import prelucrare_date as  p_d
 class Thread_Trimitere_ACK(Thread):
     # variabila de cond ce o sa imi spuna cand incep sa trimit
     stare_ACK=Condition()
-    coada_ACK=[]
+    coada_ACK=[]  # coada in care voi adauga ACK pentru trimitere
     trimit_ACK=False # pentru partea de pierdere a pachetelor
-    coada_nu_ACK=[]
-    ultima_ACK=['%0%']
-    coada_index = [0]
-    am_t_d = False
+    ultima_ACK=['%0%'] # retin ultimul ACK trimis pt partea de duplicat
+    coada_index = [0] # coada pt contorizarea nr de ACK duplicat
+    am_t_d = False # flag care imi spune daca am oprit sau nu trimiterea
 
     def __init__(self, interfata):
         # apelez constructorul din clasa parinte
@@ -34,10 +33,12 @@ class Thread_Trimitere_ACK(Thread):
             if len(Thread_Trimitere_ACK.coada_ACK):
                 # daca am primit din nou ultimul pachet, nu il mai fac duplicat
                 if Thread_Trimitere_ACK.ultima_ACK[0] != Thread_Trimitere_ACK.coada_ACK[0]:
-                    self.ACK_netrimise()
+                    self.ACK_netrimise() # verific daca trimit sau nu ACK pt pachetul curent
                 # in cazul in care nu am blocat trimiterea ACK, trimit pe socket
+                # TODO debug
                 print("coada ACK de trimis")
                 print(Thread_Trimitere_ACK.coada_ACK)
+                # daca am in coada de ACK si nu am blocat trimiterea, trimit pe socket ACK
                 if(len(Thread_Trimitere_ACK.coada_ACK) and not(Thread_Trimitere_ACK.trimit_ACK) ):
                     print("Trimit normal")
                     string = Thread_Trimitere_ACK.coada_ACK.pop(0)
@@ -51,43 +52,26 @@ class Thread_Trimitere_ACK(Thread):
                     self.i.update_label_ACK(sir)
                 else:
                     # trimit patru copii pentru ultima ACK, pentru cazul in carea m blocat trimiterea
-                    '''if Thread_Trimitere_ACK.coada_index[0] < 4:
-                        print("Trimit cele 4 ACK DUPLICATE")
-                        string = Thread_Trimitere_ACK.ultima_ACK[0]
-                        print("TRIMIT "+ string)
-                        sir = string
-                        string = '%' + string + '%'
-                        s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
-                                                                (s_u.Socket_Utile.localIP, 20001))
-                        # actualizez contorul
-                        Thread_Trimitere_ACK.coada_index[0] = Thread_Trimitere_ACK.coada_index[0] + 1
-                        self.i.update_label_ACK(sir)
-
-                    else:
-                        # am terminat de trimis copiile si las coada de ACK vida
-                        Thread_Trimitere_ACK.coada_ACK=[]
-                        Thread_Trimitere_ACK.coada_index[0] = 0
-                        print("am terminat cu duplicatele")
-                        print(' Din thread trimitere coada de pachete arata :')
-                        print(Thread_Primire_Date.coada_pachete)
-                        self.i.update_label_ACK("AM TERMINAT DE TRIMIS COPIILE")
-                        Thread_Primire_Date.coada_pachete = []'''
                     Thread_Trimitere_ACK.am_t_d = True
+                    # scot din coada ultima ACK trimisa
                     string = Thread_Trimitere_ACK.ultima_ACK[0]
                     sir = string
+                    # impachetez sirul conform conventiei de la inceput
                     string = '%' + string + '%'
+                    # trimit 4 ACK ale ultimei cereri
                     for i in range(0, 4):
-                        print("TRIMIT " + string)
+                        print("TRIMIT " + string) # debug
+                        # trimit pe socket
                         s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
                                                                 (s_u.Socket_Utile.localIP, 20001))
                         # actualizez contorul
                         Thread_Trimitere_ACK.coada_index[0] = Thread_Trimitere_ACK.coada_index[0] + 1
-                        self.i.update_label_ACK(sir)
-                    Thread_Trimitere_ACK.coada_ACK = []
+                        self.i.update_label_ACK(sir) # actualizez pe interfata
+                    Thread_Trimitere_ACK.coada_ACK = [] # eliberez cozile
                     Thread_Primire_Date.coada_pachete = []
-                    Thread_Trimitere_ACK.am_t_d = False
+                    Thread_Trimitere_ACK.am_t_d = False # schimb starea
 
-                        # eliberez lock'''
+                        # eliberez lock
                 Thread_Trimitere_ACK.stare_ACK.release()
 
     # functie pentru ACK netrimise
@@ -126,7 +110,6 @@ class Thread_Primire_Date(Thread):
         while True:
             # primesc lock
             Thread_Primire_Date.stare_primire_date.acquire()
-
             # verific daca s-a apasat pe start
             if not s_u.Socket_Utile.flag:
                 # astept
@@ -136,24 +119,20 @@ class Thread_Primire_Date(Thread):
 
             # scot date de pe socket
             if r:
+                # primesc pe socket
                 data, address = s_u.Socket_Utile.UDPServerSocket.recvfrom(s_u.Socket_Utile.bufferSize)
                 # daca am blocata trimiterea, verific daca pot sa deblochez trimiterea
                 if (Thread_Trimitere_ACK.trimit_ACK):
                     self.deblocare_trimitere(str(data))
                 #pun in coada inf citite din socket
                 Thread_Primire_Date.coada_pachete.append(str(data))
-                print("AM PRIMIT "+ str(data))
+                print("AM PRIMIT "+ str(data)) # debug
 
                 print(Thread_Trimitere_ACK.trimit_ACK)
-                # self.deblocare_trimitere()
-                # TODO prelucrarea pachetelor si afisarea a ceva mai mic pe interfata
                 # anunt thread-ul pentru prelucrarea inf
                 p_d.Thread_date.stare_date_primite.acquire()
                 p_d.Thread_date.stare_date_primite.notify()
                 p_d.Thread_date.stare_date_primite.release()
-                # TODO aici nu este ok, nu pot sa modific astea cum vreau eu, tre sa gasesc
-                # o alta cale de sincronizare
-
                 # actualizez inf de pe interfata
 
                 sir = p_d.Prelucrare_date.nr_pachet(str(data))
@@ -162,15 +141,15 @@ class Thread_Primire_Date(Thread):
 
     def deblocare_trimitere(self, sir ):
         print('am intrat in fct de deblocare')
+        # daca primesc ceva de la emitator deblochez trimiterea
         Thread_Trimitere_ACK.trimit_ACK = False
+        # debug
         print(' Din fct de deblocare coada de pachete arata :')
         print(Thread_Primire_Date.coada_pachete)
         print(Thread_Trimitere_ACK.trimit_ACK)
         print("coada ACK")
         print(Thread_Trimitere_ACK.coada_ACK)
-        # parcurg lista pentru care nu am trimis inapoi ACK
-        # si daca primesc un pachet care se afla in aceasta lista, deblochez
-        # procesul de trimitere a pachetelor
+
 
 
 

@@ -3,6 +3,7 @@ from tkinter import messagebox
 
 import Design as d
 import prelucrare_interfata as p_i
+import socket_com as s_c
 import socket_utile as s_u
 import text as t
 
@@ -49,11 +50,11 @@ class InterfataGrafica:
         self.var = IntVar()  # variabila care o sa spuna cum este conexiunea
         self.deschis = Radiobutton(self.i, text="Conexiune deschisa!", variable=self.var,
                                    value=1, bg=d.Design.culoarea_back,
-                                   fg=d.Design.culoare_scris,
+                                   fg='black',
                                    font=('Arial', 14, 'bold'))
         self.inchis = Radiobutton(self.i, text="Conexiune inchisa!", variable=self.var,
                                   value=2, bg=d.Design.culoarea_back,
-                                  fg=d.Design.culoare_scris,
+                                  fg='black',
                                   font=('Arial', 14, 'bold'))
         # conexiunea este initial inchisa
         self.var.set(2)
@@ -126,49 +127,37 @@ class InterfataGrafica:
         self.i.mainloop()
 
 
-
-    def text_box_create(self, x, y):
-        #creez caseta text
-        text_box=Text(self.i, width=50, height=30, bg='thistle')
-        text_box.place(x=x, y=y)
-        return text_box
-
-
-
-    def create_label(self, text, x, y):
-        #creez etichete
-        l1=Label(self.i, text=text, bg='lavenderblush', font=('verdana', 15) )
-        l1.place(x=x, y=y)
-        return l1
-
     #functiile pentru update ale casetelor text
     def update_label_packet(self, text):
         self.text_box.insert(END, 'Pachet <-'+text+'\n')
 
-
     def update_label_ACK(self, nr):
         self.text_inf.insert(END, 'ACK -> '+nr+'\n')
 
-
+    # fct de callback a butonului de start
     def partea_de_start(self):
         # scot de pe interfata probabilitatea
-        sir=self.p.get()
+        sir = self.p.get()
+        # validez probabilitatea introdusa de utilizator
         if not(p_i.prelucrare_inf_int.prelucrare_prob(sir)):
             self.p.delete(0, END)
             return
-        sir =  self.e_port_i.get()
+        # scot numarul portului
+        sir = self.e_port_i.get()
+        # validez numarul portului
         if not(p_i.prelucrare_inf_int.validare_port(sir)):
             self.e_port_i.delete(0, END)
             return
         sir = p_i.prelucrare_inf_int.numar(sir)
-        InterfataGrafica.port.append(sir)
-        self.var.set(1)
+
+        InterfataGrafica.port.append(sir) # pun numarul portului in coada cores
+        self.var.set(1) # setez conexiunea ca fiind deschisa
         # creez legatura cu socketul
         s_u.Socket_Utile.initializare()
 
-
-
     def call_stop(self):
+        # fct de callback a butonului de stop
+        # setez valoarea butonului radio ca fiind inchis
         self.var.set(2)
 
 

@@ -1,3 +1,4 @@
+# in aceasta clasa  scriu textul pentru meniu
 
 class my_text:
     help= ' pentru a lansa...'

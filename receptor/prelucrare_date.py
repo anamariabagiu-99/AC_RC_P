@@ -2,12 +2,11 @@ from threading import Thread
 from threading import Condition
 import socket_com  as s_c
 import interfata_grafica as i_g
-import time
 import random
 
 
 class Prelucrare_date:
-    f =0
+    f = 0 # pointer catre fisier
     @staticmethod
     def prelucrare(sir):
         # verific daca nu am un pachet de start sau de stop
@@ -18,7 +17,7 @@ class Prelucrare_date:
                 # deschid fisierul
                 Prelucrare_date.f = open(s[2], "a")
             elif Prelucrare_date.siruri_egale(s[1],'STOP' ):
-                Prelucrare_date.f.close()
+                Prelucrare_date.f.close() # inchid fisierul
             return []
         else:
             # formatul pachetului este & nr& sir #suma#
@@ -49,17 +48,20 @@ class Prelucrare_date:
 
     @staticmethod
     def suma_de_control(sir):
+        # calculez suma de control a sirului primit
         suma = 0
         for c in sir:
-            suma+= ord(c)
+            suma += ord(c) # la suma curenta adaug codul ASCII al simbolului
         return suma
 
     @staticmethod
     def sir_number(sir):
-        nr =  0
+        # fct care face  transformare din sir->numar
+        nr = 0
         for c in sir :
+            # aplic formula de la matematica
             nr = nr*10 + int(c)
-        #print(nr+1)
+
         return nr
 
     @staticmethod
@@ -83,6 +85,7 @@ class Prelucrare_date:
 
     @staticmethod
     def siruri_egale(s1, s2):
+        # fct pentru a compara daca 2 siruri sunt egale
         if len(s1) != len(s2):
             return False
         for i in (0, len(s1) - 1):
@@ -92,7 +95,9 @@ class Prelucrare_date:
 
     @staticmethod
     def nr_pachet(sir):
+        # fct pentru a afisa pe interfata doar nr pachetului, nu si continutul
         print(sir[2])
+        # verific daca e de start sau stop si returnez sirulul corespunzator
         if(sir[2]=='*'):
             print(sir[0])
             s = sir.split('*')
@@ -102,6 +107,7 @@ class Prelucrare_date:
             elif (Prelucrare_date.siruri_egale(s[1],'STOP' ) ):
                 return 'inchis :'+ s[2]
         else:
+            # prelucrez sirul corespunzator
             s = sir.split('&')
             print(s)
             # scot numarul pachetului, imi trebuie pentru partea de confirmare
@@ -123,7 +129,6 @@ class Thread_date(Thread):
         while True:
             # primesc lock
             Thread_date.stare_date_primite.acquire()
-
             if len(s_c.Thread_Primire_Date.coada_pachete) == 0:
                 # cat timp nu am pachete primite de prelucrat, astept
                 Thread_date.stare_date_primite.wait()
@@ -134,7 +139,6 @@ class Thread_date(Thread):
                 lista = Prelucrare_date.prelucrare(sir)
                 if(len(lista)):
                 # r il pun in coada pentru trimis confirmari
-                #print(lista[0])
                     s_c.Thread_Trimitere_ACK.coada_ACK = s_c.Thread_Trimitere_ACK.coada_ACK+lista
 
                     # anunt threadul pentru trimiterea de ACK

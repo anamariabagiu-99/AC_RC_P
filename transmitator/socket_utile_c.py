@@ -4,9 +4,10 @@ import socket_comunicare as s_c
 class Socket_Utile:
     localIP = "127.0.0.1"
     localPort = 20001
-    bufferSize = 1024
+    bufferSize = 1024 # dimensiune port
     UDPServerSocket = None
-    flag = False
+    flag = False # flag care imi spune daca conexiunea la socket
+                # a fost realizata sau nu
 
     @staticmethod
     def initializare():
@@ -16,8 +17,6 @@ class Socket_Utile:
             exit
         # am modificat starea flag-ului
         Socket_Utile.flag = True
-        # TODO tratare erori de conexiune
-        # try catch cea   mai de baza exceptie
         # creez socket-ul
 
         Socket_Utile.UDPServerSocket = socket.socket(family=socket.AF_INET,
