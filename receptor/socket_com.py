@@ -1,3 +1,4 @@
+import interfata_grafica as i_g
 import select
 import socket_utile as s_u
 from threading import Thread
@@ -45,8 +46,9 @@ class Thread_Trimitere_ACK(Thread):
                     sir = string
                     print("Trimit "+ sir)
                     string='%'+string +'%'
+                    port = i_g.InterfataGrafica.port [1]
                     s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
-                                                            (s_u.Socket_Utile.localIP, 20001))
+                                                            (s_u.Socket_Utile.localIP, port))
                     # actualizez ultima ACK
                     Thread_Trimitere_ACK.ultima_ACK.insert(0 , string)
                     self.i.update_label_ACK(sir)
@@ -58,12 +60,14 @@ class Thread_Trimitere_ACK(Thread):
                     sir = string
                     # impachetez sirul conform conventiei de la inceput
                     string = '%' + string + '%'
+                    port = i_g.InterfataGrafica.port[1]
+
                     # trimit 4 ACK ale ultimei cereri
                     for i in range(0, 4):
                         print("TRIMIT " + string) # debug
                         # trimit pe socket
                         s_u.Socket_Utile.UDPServerSocket.sendto(bytearray(string.encode('utf-8')),
-                                                                (s_u.Socket_Utile.localIP, 20001))
+                                                                (s_u.Socket_Utile.localIP, port))
                         # actualizez contorul
                         Thread_Trimitere_ACK.coada_index[0] = Thread_Trimitere_ACK.coada_index[0] + 1
                         self.i.update_label_ACK(sir) # actualizez pe interfata
