@@ -5,6 +5,7 @@ from prelucrare_date import *
 
 def main():
     # instantiez gui
+
     r = InterfataGrafica()
     # creez thread-urile
     t_trimire_ACK = Thread_Trimitere_ACK(r)
@@ -21,9 +22,8 @@ def main():
 
     # opresc threadurile
     t_prelucrare.join()
-    t_primire_date.join()
-    t_trimire_ACK.join()
 
+    t_trimire_ACK.join()
 
 if __name__ == '__main__':
     main()

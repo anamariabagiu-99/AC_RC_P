@@ -1,6 +1,6 @@
 import Design as d
 import text as t
-
+import prelucrare_inf_int as p_i
 from prelucrare_fisiere import *
 from socket_utile_c import *
 from tkinter import *
@@ -9,6 +9,7 @@ from tkinter import messagebox
 
 
 class InterfataGrafica:
+    port = [0, 0] # coada in care voi pune porturile introduse de utilizator
     def __init__(self):
         #creez fereastra
         self.i = Tk()
@@ -26,12 +27,21 @@ class InterfataGrafica:
                                     font=('Arial', 30, 'bold')
                                     )
         # eticheta port, in care voi afisa portul pe care comunic
-        self.e_port = Label(self.i, text='Port', bg=d.Design.culoarea_back,
+        self.e_port_sursa = Label(self.i, text='Port sursa', bg=d.Design.culoarea_back,
                                     fg=d.Design.culoare_scris,
                                     font=('Arial', 20, 'bold'))
-        self.e_port_i = Label(self.i, text=Socket_Utile.localPort, bg=d.Design. culoare_port,
-                            fg=d.Design.culoare_scris,
-                            font=('Arial', 20, 'bold'))
+        self.e_port_s =  Entry(self.i , bg=d.Design.culoarea_back,
+                       fg=d.Design.culoare_scris,
+                       font=('Arial', 20, 'bold')
+                       )
+        self.e_port_destinatie = Label(self.i, text='Port destinatie', bg=d.Design.culoarea_back,
+                                  fg=d.Design.culoare_scris,
+                                  font=('Arial', 20, 'bold'))
+        self.e_port_d = Entry(self.i, bg=d.Design.culoarea_back,
+                              fg=d.Design.culoare_scris,
+                              font=('Arial', 20, 'bold')
+                              )
+
         # butonul pentru rasfoire, alegerea fisierului ce va fi trimis
         self.fisier =  Label(self.i, text = 'Alegeti un fisier folosind butonul ', bg=d.Design.culoarea_back,
                             fg=d.Design.culoare_scris,
@@ -94,9 +104,11 @@ class InterfataGrafica:
     def plasare_gui(self):
         # plasez elementele create pe gui
         self.eticheta_titlu.place(x=100, y=10)
-        self.eticheta_subtitlul.place(x=250, y=100)
-        self.e_port.place(x=100, y=175)
-        self.e_port_i.place(x=200, y=175)
+        self.eticheta_subtitlul.place(x=250, y=80)
+        self.e_port_sursa.place(x=100, y=125)
+        self.e_port_s.place(x=300, y=125)
+        self.e_port_destinatie.place(x=100, y=175)
+        self.e_port_d.place(x=300, y=175)
         self.fisier.place(x=75, y=225)
         self.deschis.place(x=100, y=700)
         self.inchis.place(x=475, y=700)
@@ -121,7 +133,27 @@ class InterfataGrafica:
         self.stop.place(x=475, y=740)
 
     def call_start(self):
-        self.var.set(1)
+        self.var.set(1) # setez conex pe deschisa
+        # scot valorile porturilor si le validez
+        p1 = self.e_port_s.get()
+        # validez
+        if p_i.prelucrare_inf_int.validare_port(p1):
+            # il transform in numar
+            nr1 = p_i.prelucrare_inf_int.numar(p1)
+            # il adaug in coada
+            InterfataGrafica.port[0] = nr1
+        else:
+            self.e_port_s.delete(0, END)
+            return
+        # procedez la fel si pentru portul destinatie
+        p2 = self.e_port_d.get()
+        if p_i.prelucrare_inf_int.validare_port(p2):
+            nr2 = p_i.prelucrare_inf_int.numar(p2)
+            InterfataGrafica.port[1] = nr2
+        else:
+            self.e_port_d.delete(0, END)
+            return
+
         Socket_Utile.initializare()
 
     def call_stop(self):

@@ -139,8 +139,7 @@ class Thread_date(Thread):
                 lista = Prelucrare_date.prelucrare(sir)
                 if(len(lista)):
                 # r il pun in coada pentru trimis confirmari
-                    s_c.Thread_Trimitere_ACK.coada_ACK = s_c.Thread_Trimitere_ACK.coada_ACK+lista
-
+                    s_c.Thread_Trimitere_ACK.coada_ACK = s_c.Thread_Trimitere_ACK.coada_ACK + lista
                     # anunt threadul pentru trimiterea de ACK
                     s_c.Thread_Trimitere_ACK.stare_ACK.acquire()
                     s_c.Thread_Trimitere_ACK.stare_ACK.notify()
@@ -148,3 +147,5 @@ class Thread_date(Thread):
 
             # eliberez lock
             Thread_date.stare_date_primite.release()
+
+

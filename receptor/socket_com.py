@@ -10,10 +10,10 @@ import prelucrare_date as  p_d
 
 class Thread_Trimitere_ACK(Thread):
     # variabila de cond ce o sa imi spuna cand incep sa trimit
-    stare_ACK=Condition()
-    coada_ACK=[]  # coada in care voi adauga ACK pentru trimitere
-    trimit_ACK=False # pentru partea de pierdere a pachetelor
-    ultima_ACK=['%0%'] # retin ultimul ACK trimis pt partea de duplicat
+    stare_ACK = Condition()
+    coada_ACK = []  # coada in care voi adauga ACK pentru trimitere
+    trimit_ACK = False # pentru partea de pierdere a pachetelor
+    ultima_ACK = ['%0%'] # retin ultimul ACK trimis pt partea de duplicat
     coada_index = [0] # coada pt contorizarea nr de ACK duplicat
     am_t_d = False # flag care imi spune daca am oprit sau nu trimiterea
 
@@ -70,11 +70,12 @@ class Thread_Trimitere_ACK(Thread):
                                                                 (s_u.Socket_Utile.localIP, port))
                         # actualizez contorul
                         Thread_Trimitere_ACK.coada_index[0] = Thread_Trimitere_ACK.coada_index[0] + 1
+
+
                         self.i.update_label_ACK(sir) # actualizez pe interfata
                     Thread_Trimitere_ACK.coada_ACK = [] # eliberez cozile
                     Thread_Primire_Date.coada_pachete = []
                     Thread_Trimitere_ACK.am_t_d = False # schimb starea
-
                         # eliberez lock
                 Thread_Trimitere_ACK.stare_ACK.release()
 
@@ -101,8 +102,9 @@ class Thread_Trimitere_ACK(Thread):
 
 class Thread_Primire_Date(Thread):
     # variabila de conditie pentru primirea de pachete
-    stare_primire_date=Condition()
-    coada_pachete=[]
+    stare_primire_date = Condition()
+    coada_pachete = [] # coada pachete trimise spre prelucrare
+    buffer_socket = []
 
     def __init__(self, interfata):
         # apelez constructorul din clasa parinte
@@ -126,6 +128,7 @@ class Thread_Primire_Date(Thread):
                 # primesc pe socket
                 data, address = s_u.Socket_Utile.UDPServerSocket.recvfrom(s_u.Socket_Utile.bufferSize)
                 # daca am blocata trimiterea, verific daca pot sa deblochez trimiterea
+                Thread_Primire_Date.buffer_socket.append(str(data))
                 if (Thread_Trimitere_ACK.trimit_ACK):
                     self.deblocare_trimitere(str(data))
                 #pun in coada inf citite din socket
@@ -141,6 +144,8 @@ class Thread_Primire_Date(Thread):
 
                 sir = p_d.Prelucrare_date.nr_pachet(str(data))
                 self.interfata.update_label_packet(sir)
+                print('buffer')
+                print(Thread_Primire_Date.buffer_socket)
             Thread_Primire_Date.stare_primire_date.release()
 
     def deblocare_trimitere(self, sir ):
@@ -153,12 +158,4 @@ class Thread_Primire_Date(Thread):
         print(Thread_Trimitere_ACK.trimit_ACK)
         print("coada ACK")
         print(Thread_Trimitere_ACK.coada_ACK)
-
-
-
-
-
-
-
-# TODO revezi partea aceasta de cod
 

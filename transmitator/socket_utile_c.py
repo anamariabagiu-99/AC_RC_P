@@ -1,5 +1,7 @@
+import interfata_grafica as i_g
 import socket
 import socket_comunicare as s_c
+
 
 class Socket_Utile:
     localIP = "127.0.0.1"
@@ -22,7 +24,8 @@ class Socket_Utile:
         Socket_Utile.UDPServerSocket = socket.socket(family=socket.AF_INET,
                                         type=socket.SOCK_DGRAM)
         # fac bind
-        Socket_Utile.UDPServerSocket.bind((Socket_Utile.localIP, Socket_Utile.localPort))
+        port =i_g.InterfataGrafica.port[0]
+        Socket_Utile.UDPServerSocket.bind((Socket_Utile.localIP,port))
 
         #  anunt thread-ul de primire ca poate sa isi inceapa treaba
         s_c.Thread_Primire.stare_primire.acquire()

@@ -6,7 +6,7 @@ from threading import Condition
 # creez o clasa care sa imi fac prelucrarea ACK
 
 class Thread_Prelucrare_ACK(Thread):
-    stare_prelucrare_ACK=Condition() # var de cond pentru sincronizare thread
+    stare_prelucrare_ACK = Condition() # var de cond pentru sincronizare thread
 
     def __init__(self):
         # apelez constructorul din clada parinte
@@ -14,7 +14,7 @@ class Thread_Prelucrare_ACK(Thread):
 
     def run(self):
         # rulez thread-ul la infinit
-        while(1):
+        while 1:
             # primesc lock
             Thread_Prelucrare_ACK.stare_prelucrare_ACK.acquire()
             # astept cat timp coada de ACK e goala
@@ -23,7 +23,7 @@ class Thread_Prelucrare_ACK(Thread):
             # daca am in coada prelucrez
             else:
               # scot din coada sirul
-                sir=sc.Thread_Primire.coada_ACK.pop(0)
+                sir = sc.Thread_Primire.coada_ACK.pop(0)
                 # ar trebui sa parcurg coada de pachete neconfirmate si sa il scot pe cel pentru
                 # care am primit ack
                 for i in range(0, len(ta.Tahoe_Algoritm.coada_pachete_neconfirmate)):

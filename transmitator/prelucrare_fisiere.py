@@ -8,8 +8,8 @@ import socket_utile_c as s_u
 class Prelucrare_fisier:
     dim_pachet = 2 # setez dimenisiunea unui pachet
     coada_siruri = []  # coada pentru siruri
-    numar_pachet=0 # contor pentru impachetare
-    nr_pachet=1
+    numar_pachet = 0 # contor pentru impachetare
+    nr_pachet = 1
 
     @staticmethod
     def citire_fisier(cale):
@@ -116,15 +116,15 @@ class Thread_Prelucrare(Thread):
             # daca in coada se adauga un fisier pornesc imediat sa il prelucrez
             if len(Thread_Prelucrare.coada_fisiere):
                 # scot din coada prima cale spre un fisier
-                cale =Thread_Prelucrare.coada_fisiere.pop(0)
+                cale = Thread_Prelucrare.coada_fisiere.pop(0)
                 # retin calea pentru impachetarea pachetelor de start si stop
-                sir=Prelucrare_fisier.citire_fisier(cale)
+                sir = Prelucrare_fisier.citire_fisier(cale)
                 # prelucrez si pun in coada pachetul de start
                 s = Prelucrare_fisier.pachet_start_stop(cale, 1)
                 # adaug pachetul de start
                 Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + [s]
                 # prelucrez continutul fisierului
-                pachete=Prelucrare_fisier.impachetare_continut(sir)
+                pachete = Prelucrare_fisier.impachetare_continut(sir)
                 # pun in coada de pachete
                 Thread_Prelucrare.coada_pachete = Thread_Prelucrare.coada_pachete + pachete
                 # dupa ce am pus toate pachetele corespunzatoare, adaug pachetul de stop
